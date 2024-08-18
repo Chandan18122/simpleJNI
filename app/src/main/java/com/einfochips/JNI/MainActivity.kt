@@ -17,13 +17,29 @@ class MainActivity : AppCompatActivity() {
 
         // Example of a call to a native method
         binding.sampleText.text = stringFromJNI()
+
+        binding.addButton.setOnClickListener {
+            val num1 = binding.editTextNumber1.text.toString().toIntOrNull() ?: 0
+            val num2 = binding.editTextNumber2.text.toString().toIntOrNull() ?: 0
+            binding.sampleText.text = "$num1 + $num2 = ${addTwoNumberJNI(num1, num2)}"
+            binding.editTextNumber1.text?.clear()
+            binding.editTextNumber2.text?.clear()
+
+        }
+
+        binding.randomNumButton.setOnClickListener {
+            binding.sampleText.text = "Random number : ${randomNumberJNI()}"
+        }
+
     }
 
     /**
      * A native method that is implemented by the 'JNI' native library,
      * which is packaged with this application.
      */
-    external fun stringFromJNI(): String
+    private external fun stringFromJNI(): String
+    private external fun addTwoNumberJNI(num1: Int, num2: Int): Int
+    private external fun randomNumberJNI(): Int
 
     companion object {
         // Used to load the 'JNI' library on application startup.
