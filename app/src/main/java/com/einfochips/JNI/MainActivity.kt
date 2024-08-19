@@ -2,7 +2,6 @@ package com.einfochips.JNI
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.TextView
 import com.einfochips.JNI.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -31,6 +30,15 @@ class MainActivity : AppCompatActivity() {
             binding.sampleText.text = "Random number : ${randomNumberJNI()}"
         }
 
+        val student : Student = createStudentJNI(1, "Chandan Kumar", 24, 85)
+        binding.getStudentDetailsButton.setOnClickListener {
+            binding.sampleText.text = "${getStudentDetailsJNI(student)}"
+        }
+
+        binding.getResultButton.setOnClickListener {
+            val result = getResultJNI(student)
+            binding.sampleText.text = "Roll: ${result.roll}, Result: ${result.status}, Score: ${result.grade}"
+        }
     }
 
     /**
@@ -40,7 +48,9 @@ class MainActivity : AppCompatActivity() {
     private external fun stringFromJNI(): String
     private external fun addTwoNumberJNI(num1: Int, num2: Int): Int
     private external fun randomNumberJNI(): Int
-
+    private external fun getStudentDetailsJNI(student: Student): String
+    private external fun createStudentJNI(roll: Int, name: String, age: Int, score: Int): Student
+    private external fun getResultJNI(student: Student): Result
     companion object {
         // Used to load the 'JNI' library on application startup.
         init {
@@ -48,3 +58,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
+data class Student(val roll: Int, val name: String, val age: Int, val score: Int)
+data class Result(val roll: Int, val status: String, val grade: String)
