@@ -39,6 +39,24 @@ class MainActivity : AppCompatActivity() {
             val result = getResultJNI(student)
             binding.sampleText.text = "Roll: ${result.roll}, Result: ${result.status}, Score: ${result.grade}"
         }
+
+        binding.studentFromBundleButton.setOnClickListener {
+            val bundle = Bundle()
+            bundle.putParcelable("student", student)
+            binding.sampleText.text = "Student from Bundle: ${createStudentFromBundleJNT(bundle)}"
+        }
+
+        binding.arrayListOfStudentsResultButton.setOnClickListener {
+            val studentList = arrayListOf(
+                Student(1,"Chandan Kumar", 24, 95),
+                Student(2,"Ranjan Kumar", 21, 90)
+            )
+            binding.sampleText.text = "Student List: ${sendStudentsJNI(studentList)}"
+        }
+
+        binding.studentEnumButton.setOnClickListener {
+            binding.sampleText.text = "Student ENUM: ${sendStudentEnumJNT(StudentEnum.SENIOR)} ,${sendStudentEnumJNT(StudentEnum.JUNIOR)}"
+        }
     }
 
     /**
@@ -51,6 +69,9 @@ class MainActivity : AppCompatActivity() {
     private external fun getStudentDetailsJNI(student: Student): String
     private external fun createStudentJNI(roll: Int, name: String, age: Int, score: Int): Student
     private external fun getResultJNI(student: Student): Result
+    private external fun createStudentFromBundleJNT(bundle: Bundle): String
+    private external fun sendStudentsJNI(list: List<Student>): String
+    private external fun sendStudentEnumJNT(studentEnum: StudentEnum): Int
     companion object {
         // Used to load the 'JNI' library on application startup.
         init {
@@ -59,5 +80,3 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-data class Student(val roll: Int, val name: String, val age: Int, val score: Int)
-data class Result(val roll: Int, val status: String, val grade: String)

@@ -1,5 +1,6 @@
 #include <jni.h>
 #include <string>
+#include <array>
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_einfochips_JNI_MainActivity_stringFromJNI(
@@ -96,4 +97,116 @@ Java_com_einfochips_JNI_MainActivity_getResultJNI(JNIEnv *env, jobject thiz, job
 
     jobject result = env->NewObject(resultClass, constructor, roll, status, grade);
     return result;
+}
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_einfochips_JNI_MainActivity_createStudentFromBundleJNT(JNIEnv *env, jobject thiz,
+                                                                jobject bundle) {
+    // Get the Bundle class
+    jclass bundleClass = env->GetObjectClass(bundle);
+
+    // Get the method ID for 'getParcelable'
+    jmethodID getParcelableMethod = env->GetMethodID(bundleClass, "getParcelable", "(Ljava/lang/String;)Landroid/os/Parcelable;");
+    if (getParcelableMethod == nullptr) {
+        // Handle error if the method is not found
+        return reinterpret_cast<jstring>(env->ThrowNew(
+                env->FindClass("java/lang/NoSuchMethodError"),
+                "No such method getParcelable in Bundle class."));
+    }
+
+    // Create a Java String for the key
+    jstring key = env->NewStringUTF("student");
+
+    // Call getParcelable to get the Student object
+    jobject studentObject = env->CallObjectMethod(bundle, getParcelableMethod, key);
+
+    // Clean up the local reference to the key
+    env->DeleteLocalRef(key);
+
+    // Check if the returned object is null
+    if (studentObject == nullptr) {
+        // Handle the case where the object is not found
+        return reinterpret_cast<jstring>(env->ThrowNew(
+                env->FindClass("java/lang/NullPointerException"),
+                "No Parcelable object found in Bundle with the specified key."));
+    }
+
+    // Get the Student class
+    jclass studentClass = env->GetObjectClass(studentObject);
+
+    // Get the methods for the fields in Student
+    jmethodID getRollMethod = env->GetMethodID(studentClass, "getRoll", "()I");
+    jmethodID getNameMethod = env->GetMethodID(studentClass, "getName", "()Ljava/lang/String;");
+    jmethodID getAgeMethod = env->GetMethodID(studentClass, "getAge", "()I");
+    jmethodID getScoreMethod = env->GetMethodID(studentClass, "getScore", "()I");
+
+    if (getRollMethod == nullptr || getNameMethod == nullptr || getAgeMethod == nullptr || getScoreMethod == nullptr) {
+        return reinterpret_cast<jstring>(env->ThrowNew(
+                env->FindClass("java/lang/NoSuchMethodError"),
+                "No such methods in Student class."));
+    }
+
+    // Call the methods to get the field values
+    jint roll = env->CallIntMethod(studentObject, getRollMethod);
+    auto name = (jstring) env->CallObjectMethod(studentObject, getNameMethod);
+    jint age = env->CallIntMethod(studentObject, getAgeMethod);
+    jint score = env->CallIntMethod(studentObject, getScoreMethod);
+
+    const char *nameStr = env->GetStringUTFChars(name, nullptr);
+
+    std::string result =
+            "Roll: "+ std::to_string(roll)+", Name: " + std::string(nameStr) + ", Age: " + std::to_string(age) + ", Score: " +
+            std::to_string(score);
+
+    env->ReleaseStringUTFChars(name, nameStr);
+
+    env->DeleteLocalRef(studentObject);
+    env->DeleteLocalRef(studentClass);
+    env->DeleteLocalRef(name);
+
+    return env->NewStringUTF(result.c_str());
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_einfochips_JNI_MainActivity_sendStudentsJNI(JNIEnv *env, jobject thiz,
+                                                                jobject arrayListOfStudents) {
+
+    jclass arrayListClass = env->GetObjectClass(arrayListOfStudents);
+    if(arrayListClass == nullptr) return env->NewStringUTF("ArrayList class not found");
+
+    jmethodID sizeMethod = env->GetMethodID(arrayListClass, "size", "()I");
+    if(sizeMethod == nullptr) return env->NewStringUTF("size method not found");
+
+    jmethodID getMethod = env->GetMethodID(arrayListClass, "get", "(I)Ljava/lang/Object;");
+    if(getMethod == nullptr) return env->NewStringUTF("getMethod not found");
+
+    jint size = env->CallIntMethod(arrayListOfStudents, sizeMethod);
+
+    std::string result;
+    for (jint i = 0; i < size; i++) {
+        jobject student = env->CallObjectMethod(arrayListOfStudents, getMethod, i);
+        jclass studentClass = env->GetObjectClass(student);
+        jfieldID nameField = env->GetFieldID(studentClass, "name", "Ljava/lang/String;");
+        if (nameField == nullptr) return env->NewStringUTF("Field not found...");
+
+        auto name = (jstring) env->GetObjectField(student, nameField);
+
+        const char *nameStr = env->GetStringUTFChars(name, nullptr);
+        result += nameStr;
+        if(i < size-1) result += ", ";
+        env->ReleaseStringUTFChars(name, nameStr);
+        env->DeleteLocalRef(name);
+        env->DeleteLocalRef(student);
+    }
+
+    return env->NewStringUTF(result.c_str());
+
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_einfochips_JNI_MainActivity_sendStudentEnumJNT(JNIEnv *env, jobject thiz,
+                                                        jobject studentEnum) {
+    jclass enumClass = env->GetObjectClass(studentEnum);
+    jmethodID getMethod = env->GetMethodID(enumClass, "getId", "()I");
+    jint ordinalValue = env->CallIntMethod(studentEnum, getMethod);
+    return ordinalValue;
 }
