@@ -1,7 +1,9 @@
 package com.einfochips.JNI
 
+import android.content.ContentValues.TAG
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import com.einfochips.JNI.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -30,7 +32,12 @@ class MainActivity : AppCompatActivity() {
             binding.sampleText.text = "Random number : ${randomNumberJNI()}"
         }
 
-        val student : Student = createStudentJNI(1, "Chandan Kumar", 24, 85)
+        val marksList : ArrayList<Marks> = arrayListOf(
+            Marks("Math", 96),
+            Marks("English", 65),
+            Marks("Hindi",80)
+        )
+        val student : Student = createStudentJNI(1, "Chandan Kumar", 24, 85, marksList)
         binding.getStudentDetailsButton.setOnClickListener {
             binding.sampleText.text = "${getStudentDetailsJNI(student)}"
         }
@@ -57,6 +64,11 @@ class MainActivity : AppCompatActivity() {
         binding.studentEnumButton.setOnClickListener {
             binding.sampleText.text = "Student ENUM: ${sendStudentEnumJNT(StudentEnum.SENIOR)} ,${sendStudentEnumJNT(StudentEnum.JUNIOR)}"
         }
+
+        binding.basicTypeButton.setOnClickListener {
+
+            binding.sampleText.text = "Basic Type: ${basicTypes(12, 232232L, true, 42.2F, 232.22, "Chandan")}"
+        }
     }
 
     /**
@@ -67,11 +79,12 @@ class MainActivity : AppCompatActivity() {
     private external fun addTwoNumberJNI(num1: Int, num2: Int): Int
     private external fun randomNumberJNI(): Int
     private external fun getStudentDetailsJNI(student: Student): String
-    private external fun createStudentJNI(roll: Int, name: String, age: Int, score: Int): Student
+    private external fun createStudentJNI(roll: Int, name: String, age: Int, score: Int, marks: List<Marks>): Student
     private external fun getResultJNI(student: Student): Result
     private external fun createStudentFromBundleJNT(bundle: Bundle): String
     private external fun sendStudentsJNI(list: List<Student>): String
     private external fun sendStudentEnumJNT(studentEnum: StudentEnum): Int
+    private external fun basicTypes(anInt: Int, aLong: Long, aBoolean: Boolean, aFloat: Float, aDouble: Double, aString: String) : Boolean
     companion object {
         // Used to load the 'JNI' library on application startup.
         init {

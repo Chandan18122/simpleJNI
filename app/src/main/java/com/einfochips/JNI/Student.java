@@ -5,11 +5,14 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import java.util.List;
+
 public class Student implements Parcelable {
     private int roll;
     private String name;
     private int age;
     private int score;
+    private List<Marks> marks ;
 
     public Student(int roll, String name, int age, int score) {
         this.roll = roll;
@@ -17,12 +20,20 @@ public class Student implements Parcelable {
         this.age = age;
         this.score = score;
     }
+    public Student(int roll, String name, int age, int score, List<Marks> marks) {
+        this.roll = roll;
+        this.name = name;
+        this.age = age;
+        this.score = score;
+        this.marks = marks;
+    }
 
     protected Student(Parcel in) {
         roll = in.readInt();
         name = in.readString();
         age = in.readInt();
         score = in.readInt();
+        marks = in.createTypedArrayList(Marks.CREATOR);
     }
 
     public static final Creator<Student> CREATOR = new Creator<Student>() {
@@ -69,6 +80,14 @@ public class Student implements Parcelable {
         this.score = score;
     }
 
+    public List<com.einfochips.JNI.Marks> getMarks() {
+        return marks;
+    }
+
+    public void setMarks(List<com.einfochips.JNI.Marks> marks) {
+        this.marks = marks;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -80,5 +99,6 @@ public class Student implements Parcelable {
         dest.writeString(name);
         dest.writeInt(age);
         dest.writeInt(score);
+        dest.writeTypedList(marks);
     }
 }
